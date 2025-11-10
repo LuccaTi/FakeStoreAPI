@@ -61,7 +61,7 @@ namespace FakeStoreAPI.Host
                 string logDirectory = Path.Combine(apiBaseDirectory, builder.Configuration["Startup:LogDirectory"] ?? "logs").Replace(@"/", "\\");
                 Logger.InitLogger(logDirectory);
                 StoreAPIConfig.LoadConfig();
-                Logger.Info("Program.cs", "Main", "Application settings loaded, logger started!");
+                Logger.Info("Application settings loaded, logger started!");
 
                 //builder.Host.UseSerilog();
 
@@ -100,7 +100,7 @@ namespace FakeStoreAPI.Host
                 app.MapControllers();
                 #endregion
 
-                Logger.Info("Program.cs", "Main", "All parameters loaded, application starting...");
+                Logger.Info("All parameters loaded, application starting...");
 
                 if (useSwagger && !app.Environment.IsDevelopment())
                 {
@@ -113,20 +113,20 @@ namespace FakeStoreAPI.Host
                             address = address.Replace("http://", "https://");
                         }
                         var swaggerUrl = $"{address}/swagger";
-                        Logger.Info("Program.cs", "Main", $"===== Opening browser on: {swaggerUrl} =====");
+                        Logger.Debug("Program.cs", "Main", $"===== Opening browser on: {swaggerUrl} =====");
 
                         OpenBrowser(swaggerUrl);
                     });
                 }
                 else
                 {
-                    Logger.Info("Program.cs", "Main", $"Swagger was disabled!");
+                    Logger.Info("Swagger was disabled!");
                 }
 
                 app.Run();
 
-                Logger.Info("Program.cs", "Main", "Request to finalize received, stopping the application...");
-                Logger.Info("Program.cs", "Main", "Application stopped!");
+                Logger.Info("Request to finalize received, stopping the application...");
+                Logger.Info("Application stopped!");
             }
             catch (Exception ex)
             {
