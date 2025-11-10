@@ -25,6 +25,11 @@ namespace FakeStoreAPI.Host.Configuration
             }
         }
 
+        /// <summary>
+        /// Get configuration parameter by key, if key is an object than parameter = "key:attribute" format
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
         public static string Get(string parameter)
         {
             try
