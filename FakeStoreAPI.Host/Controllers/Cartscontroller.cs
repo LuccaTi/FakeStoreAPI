@@ -6,14 +6,17 @@ namespace FakeStoreAPI.Host.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class CartController : ControllerBase
+    public class Cartscontroller : ControllerBase
     {
         #region Atributes
-        private const string _className = "CartController";
+        private const string _className = "CartsController";
+        #endregion
+
+        #region Dependencies
         private readonly ICartService _cartService;
         #endregion
 
-        public CartController(ICartService cartService)
+        public Cartscontroller(ICartService cartService)
         {
             _cartService = cartService;
         }

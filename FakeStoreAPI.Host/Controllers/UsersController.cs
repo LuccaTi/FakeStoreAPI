@@ -6,14 +6,17 @@ namespace FakeStoreAPI.Host.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class UserController : ControllerBase
+    public class UsersController : ControllerBase
     {
         #region Atributes
-        private const string _className = "UserController";
+        private const string _className = "UsersController";
+        #endregion
+
+        #region Dependencies
         private IUserService _userService;
         #endregion
 
-        public UserController(IUserService userService)
+        public UsersController(IUserService userService)
         {
             _userService = userService;
         }

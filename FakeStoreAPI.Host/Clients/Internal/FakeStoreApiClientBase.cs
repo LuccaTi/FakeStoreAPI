@@ -20,7 +20,7 @@ namespace FakeStoreAPI.Host.Clients.Internal
         {
             try
             {
-                Logger.Debug(_className, "GetByIdAsync", $"Calling endpoint: {endpoint}");
+                Logger.Debug(_className, "GetByIdAsync", $"Calling endpoint: {_httpClient.BaseAddress + endpoint}");
                 var response = await _httpClient.GetAsync(endpoint);
                 response.EnsureSuccessStatusCode();
                 Logger.Debug(_className, "GetAllAsync", $"Request Success!");
@@ -37,7 +37,7 @@ namespace FakeStoreAPI.Host.Clients.Internal
         {
             try
             {
-                Logger.Debug(_className, "GetAllAsync", $"Calling endpoint: {endpoint}");
+                Logger.Debug(_className, "GetAllAsync", $"Calling endpoint: {_httpClient.BaseAddress + endpoint}");
                 var response = await _httpClient.GetAsync(endpoint);
                 response.EnsureSuccessStatusCode();
                 var result = await response.Content.ReadFromJsonAsync<List<T>>();
