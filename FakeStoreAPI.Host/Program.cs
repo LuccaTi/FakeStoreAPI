@@ -85,30 +85,28 @@ namespace FakeStoreAPI.Host
 
                 Logger.Info("All settings loaded, application starting...");
 
-                if (!app.Environment.IsDevelopment())
+                if (!app.Environment.IsDevelopment() && ApiConfig.UseSwaggerProduction)
                 {
-                    if (ApiConfig.UseSwaggerProduction)
+                    // Always switch to use https
+                    app.Lifetime.ApplicationStarted.Register(() =>
                     {
-                        // Always switch to use https
-                        app.Lifetime.ApplicationStarted.Register(() =>
+                        var address = app.Urls.FirstOrDefault();
+                        if (address != null)
                         {
-                            var address = app.Urls.FirstOrDefault();
-                            if (address != null)
+                            if (address.StartsWith("http://"))
                             {
-                                if (address.StartsWith("http://"))
-                                {
-                                    address = address.Replace("http://", "https://");
-                                }
-
-                                address = address.Replace("0.0.0.0", "localhost");
+                                address = address.Replace("http://", "https://");
                             }
 
-                            var swaggerUrl = $"{address}/swagger";
-                            Logger.Debug("Program.cs", "Main", $" ===== Now listening on: {swaggerUrl} ===== ");
+                            address = address.Replace("0.0.0.0", "localhost");
+                        }
 
-                            OpenBrowser(swaggerUrl);
-                        });
-                    }
+                        var swaggerUrl = $"{address}/swagger";
+                        Logger.Debug("Program.cs", "Main", $" ===== Now listening on: {swaggerUrl} ===== ");
+
+                        OpenBrowser(swaggerUrl);
+                    });
+
                 }
 
                 app.Run();
