@@ -62,19 +62,20 @@ O sistema é dividido em um projeto:
 ## Configuração
 
 ### appsettings.json
-Configurações principais da aplicação:
+Configurações principais da aplicação, customizáveis para se adequar ao contexto de utilização:
 
-**Seção `Startup`:**
-- `UseSwagger` ("true" | "false"): Habilita/desabilita o uso do Swagger.
+**Seção `AppConfig`:**
 - `LogDirectory` (string): Pasta para gravação dos logs (relativa ao diretório base da aplicação).
+- `UseSwaggerProduction` ("true" | "false"): Habilita usar o swagger quando a API é executada em produção (Release), mais conveniência para testes.
+- `UseSerilog` ("true" | "false"): Habilita usar o serilog no console e nos arquivos de log.
+- `FakeStoreUrl` (string): URL base da API externa FakeStore (https://fakestoreapi.com/).
+- `TimeOut` (int): Tempo limite em segundos para requisições HTTP aos clientes externos (padrão: 30s).
 
 **Seção `Logging`:**
 - `LogLevel.Default` (string): Nível de log padrão da aplicação.
 - `LogLevel.Microsoft.AspNetCore` (string): Nível de log específico para o framework ASP.NET Core.
 
 **Configurações de integração:**
-- `FakeStoreUrl` (string): URL base da API externa FakeStore (https://fakestoreapi.com/).
-- `TimeOut` (int): Tempo limite em milissegundos para requisições HTTP aos clientes externos (padrão: 30000ms).
 - `AllowedHosts` (string): Hosts permitidos para acessar a aplicação (padrão: "*" permite todos).
 
 ### appsettings.Production.json
@@ -104,4 +105,4 @@ Definidos em `API.Host/Properties/launchSettings.json`:
     - Exceções em endpoints são capturadas no controller e logadas antes de retornar `400 Bad Request`.
 
 ## Uso da API
-A API pode ser usada via console ao compilar o código e usar o .exe dentro do terminal, dependendo da configuração do appsettings.json vai abrir ou não o swagger no navegador padrão da máquina, quando usada para desenvolvimento (Debug, IDE) também vai abrir automaticamente o navegador.
+A API pode ser usada via console ao compilar o código e usar o .exe dentro do terminal, vale tanto para uso Debug quanto Release.

@@ -20,64 +20,50 @@ namespace FakeStoreAPI.Host
             try
             {
                 var builder = WebApplication.CreateBuilder(args);
-
-                #region DI Container
-
-                string apiBaseDirectory = Path.GetDirectoryName(AppContext.BaseDirectory)!;
+                ApiConfig.LoadConfig();
 
                 builder.Configuration
-                    .SetBasePath(apiBaseDirectory)
+                    .SetBasePath(ApiConfig.ApiBaseDirectory!)
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-
-                if (string.IsNullOrEmpty(builder.Configuration["FakeStoreUrl"]))
-                {
-                    throw new Exception("The client URL was not provided via appsettings.json!");
-                }
-
-                string fakeStoreUrl = builder.Configuration["FakeStoreUrl"]!;
-                int timeoutSeconds = Convert.ToInt32(builder.Configuration["TimeOut"]);
-
+                #region DI Container
                 builder.Services.AddHttpClient<IFakeStoreProductClient, FakeStoreProductClient>(client =>
                 {
-                    client.BaseAddress = new Uri(fakeStoreUrl);
-                    client.Timeout = TimeSpan.FromSeconds(timeoutSeconds == 0 ? 30 : timeoutSeconds);
+                    client.BaseAddress = new Uri(ApiConfig.FakeStoreUrl!);
+                    client.Timeout = TimeSpan.FromSeconds(ApiConfig.Timeout == 0 ? 30 : ApiConfig.Timeout);
                     client.DefaultRequestHeaders.Add("Accept", "application/json");
                 });
                 builder.Services.AddHttpClient<IFakeStoreCartClient, FakeStoreCartClient>(client =>
                 {
-                    client.BaseAddress = new Uri(fakeStoreUrl);
-                    client.Timeout = TimeSpan.FromSeconds(timeoutSeconds == 0 ? 30 : timeoutSeconds);
+                    client.BaseAddress = new Uri(ApiConfig.FakeStoreUrl!);
+                    client.Timeout = TimeSpan.FromSeconds(ApiConfig.Timeout == 0 ? 30 : ApiConfig.Timeout);
                     client.DefaultRequestHeaders.Add("Accept", "application/json");
                 });
                 builder.Services.AddHttpClient<IFakeStoreUserClient, FakeStoreUserClient>(client =>
                 {
-                    client.BaseAddress = new Uri(fakeStoreUrl);
-                    client.Timeout = TimeSpan.FromSeconds(timeoutSeconds == 0 ? 30 : timeoutSeconds);
+                    client.BaseAddress = new Uri(ApiConfig.FakeStoreUrl!);
+                    client.Timeout = TimeSpan.FromSeconds(ApiConfig.Timeout == 0 ? 30 : ApiConfig.Timeout);
                     client.DefaultRequestHeaders.Add("Accept", "application/json");
                 });
+                Logger.Info("Httpclients added");
 
-                string logDirectory = Path.Combine(apiBaseDirectory, builder.Configuration["Startup:LogDirectory"] ?? "logs").Replace(@"/", "\\");
-                Logger.InitLogger(logDirectory);
-                StoreAPIConfig.LoadConfig();
-                Logger.Info("Application settings loaded, logger started!");
-
-                //builder.Host.UseSerilog();
+                if (ApiConfig.UseSerilog)
+                    builder.Host.UseSerilog();
 
                 builder.Services.AddScoped<IProductService, ProductService>();
                 builder.Services.AddScoped<ICartService, CartService>();
                 builder.Services.AddScoped<IUserService, UserService>();
+                Logger.Info("Dependencies injected");
 
                 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+                Logger.Info("AutoMapper added");
 
                 builder.Services.AddControllers();
-                bool useSwagger = Convert.ToBoolean(builder.Configuration["Startup:UseSwagger"]);
-                if (useSwagger)
-                {
-                    builder.Services.AddEndpointsApiExplorer();
-                    builder.Services.AddSwaggerGen();
-                }
+                Logger.Info("Controllers added");
+
+                builder.Services.AddEndpointsApiExplorer();
+                builder.Services.AddSwaggerGen();
 
                 #endregion
 
@@ -85,12 +71,9 @@ namespace FakeStoreAPI.Host
 
                 #region Middleware
 
-                if (useSwagger)
-                {
-                    app.UseStaticFiles();
-                    app.UseSwagger();
-                    app.UseSwaggerUI();
-                }
+                app.UseStaticFiles();
+                app.UseSwagger();
+                app.UseSwaggerUI();
 
                 // Automatically accesses swagger when clicking on the listening link (Now listening) - Console
                 app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
@@ -100,27 +83,32 @@ namespace FakeStoreAPI.Host
                 app.MapControllers();
                 #endregion
 
-                Logger.Info("All parameters loaded, application starting...");
+                Logger.Info("All settings loaded, application starting...");
 
-                if (useSwagger && !app.Environment.IsDevelopment())
+                if (!app.Environment.IsDevelopment())
                 {
-                    // Always switch to use https
-                    app.Lifetime.ApplicationStarted.Register(() =>
+                    if (ApiConfig.UseSwaggerProduction)
                     {
-                        var address = app.Urls.FirstOrDefault();
-                        if (address != null && address.StartsWith("http://"))
+                        // Always switch to use https
+                        app.Lifetime.ApplicationStarted.Register(() =>
                         {
-                            address = address.Replace("http://", "https://");
-                        }
-                        var swaggerUrl = $"{address}/swagger";
-                        Logger.Debug("Program.cs", "Main", $"===== Opening browser on: {swaggerUrl} =====");
+                            var address = app.Urls.FirstOrDefault();
+                            if (address != null)
+                            {
+                                if (address.StartsWith("http://"))
+                                {
+                                    address = address.Replace("http://", "https://");
+                                }
 
-                        OpenBrowser(swaggerUrl);
-                    });
-                }
-                else
-                {
-                    Logger.Info("Swagger was disabled!");
+                                address = address.Replace("0.0.0.0", "localhost");
+                            }
+
+                            var swaggerUrl = $"{address}/swagger";
+                            Logger.Debug("Program.cs", "Main", $" ===== Now listening on: {swaggerUrl} ===== ");
+
+                            OpenBrowser(swaggerUrl);
+                        });
+                    }
                 }
 
                 app.Run();

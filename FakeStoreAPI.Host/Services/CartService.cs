@@ -11,7 +11,7 @@ namespace FakeStoreAPI.Host.Services
     {
         #region Atributes
         private const string _className = "CartService";
-        private string _fakeStoreUrl = StoreAPIConfig.Get("FakeStoreUrl");
+        private string _fakeStoreUrl = ApiConfig.Get("FakeStoreUrl");
         private readonly IFakeStoreCartClient _cartClient;
         private readonly IMapper _mapper;
         #endregion

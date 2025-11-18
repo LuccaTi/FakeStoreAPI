@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using FakeStoreAPI.Host.Configuration;
+using Serilog;
 using ILogger = Serilog.ILogger;
 
 namespace FakeStoreAPI.Host.Logging
@@ -19,14 +20,14 @@ namespace FakeStoreAPI.Host.Logging
                     Directory.CreateDirectory(logDirectory);
 
                 _logger = new LoggerConfiguration()
-                                    .MinimumLevel.Debug()
-                                    .WriteTo.Console()
-                                    .WriteTo.File(Path.Combine(logDirectory, $"system_log_.txt"),
-                                    rollingInterval: RollingInterval.Day, // One log file per day
-                                    retainedFileCountLimit: null, // Null keeps files indefinitely
-                                    shared: true // Allows real-time tracking of log writing
-                                    )
-                                    .CreateLogger();
+                               .MinimumLevel.Debug()
+                               .WriteTo.Console()
+                               .WriteTo.File(Path.Combine(logDirectory, $"system_log_.txt"),
+                               rollingInterval: RollingInterval.Day, // One log file per day
+                               retainedFileCountLimit: null, // Null keeps files indefinitely
+                               shared: true // Allows real-time tracking of log writing
+                               )
+                               .CreateLogger();
 
                 Log.Logger = _logger;
             }

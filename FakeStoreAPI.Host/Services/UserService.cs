@@ -11,7 +11,7 @@ namespace FakeStoreAPI.Host.Services
     {
         #region Atributes
         private const string _className = "UserService";
-        private string _fakeStoreUrl = StoreAPIConfig.Get("FakeStoreUrl");
+        private string _fakeStoreUrl = ApiConfig.Get("FakeStoreUrl");
         private IFakeStoreUserClient _userClient;
         private IMapper _mapper;
         #endregion
